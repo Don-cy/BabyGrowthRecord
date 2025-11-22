@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="color-scheme" content="light">
+    <meta name="supported-color-schemes" content="light">
+    <meta name="renderer" content="webkit">
+    <title>宝宝成长记录</title>
+    <style>
+        :root { color-scheme: light; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+            background-color: #fff0f5 !important; 
+            background-image: linear-gradient(180deg, #fff0f5 0%, #e6f7ff 100%) !important;
+            display: flex; justify-content: center; align-items: center;
+            min-height: 100vh; margin: 0; color: #444;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .container {
+            background-color: #ffffff; padding: 25px; border-radius: 24px;
+            box-shadow: 0 10px 40px rgba(180, 150, 160, 0.4);
+            text-align: center; width: 85%; max-width: 400px;
+            border: 4px solid #fff; position: relative; z-index: 10;
+        }
+        .photo-wrapper {
+            position: relative; width: 120px; height: 120px;
+            margin: -60px auto 15px auto; border-radius: 50%;
+            border: 4px solid #fff; box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            background-color: #f0f0f0; overflow: hidden; cursor: pointer;
+            -webkit-transform: translateZ(0);
+            -webkit-mask-image: -webkit-radial-gradient(white, black);
+        }
+        #babyPhoto { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .photo-placeholder {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            display: flex; justify-content: center; align-items: center;
+            color: #aaa; font-size: 0.8rem; background: #f8f8f8;
+            text-align: center; line-height: 1.2; padding: 10px;
+        }
+        #fileInput { display: none; }
+        .name-input {
+            border: none; border-bottom: 2px solid #ffd1d1;
+            text-align: center; font-size: 1.5rem; font-weight: bold;
+            color: #555; width: 80%; margin-bottom: 20px;
+            background: transparent; outline: none; padding: 5px; border-radius: 0;
+        }
+        .name-input:focus { border-bottom-color: #ff9a9e; }
+        .input-group {
+            background: #f9f9f9; padding: 15px; border-radius: 12px;
+            margin-bottom: 20px; text-align: left;
+        }
+        label { font-size: 0.85rem; color: #888; margin-bottom: 5px; display: block; }
+        input[type="date"] {
+            width: 100%; padding: 8px; border: 1px solid #eee;
+            border-radius: 8px; font-size: 1rem; box-sizing: border-box;
+            margin-bottom: 10px; background: #fff; -webkit-appearance: none;
+        }
+        .time-row { display: flex; align-items: center; justify-content: space-between; }
+        .time-box {
+            flex: 1; display: flex; align-items: center;
+            background: #fff; border: 1px solid #eee;
+            border-radius: 8px; padding: 5px 10px;
+        }
+        .time-box input {
+            border: none; width: 100%; font-size: 1.2rem;
+            text-align: center; outline: none; color: #444; background: transparent;
+        }
+        .colon { margin: 0 10px; font-weight: bold; color: #ccc; }
+        #result {
+            background: linear-gradient(135deg, #fff6f6 0%, #fff 100%);
+            border: 2px dashed #ffd1d1; border-radius: 15px;
+            padding: 20px; min-height: 80px;
+        }
+        .age-main { color: #ff7eb3; font-size: 1.2rem; font-weight: bold; margin-bottom: 8px; }
+        .age-sub { color: #888; font-size: 1rem; }
+        .number-highlight {
+            font-size: 1.6rem; color: #ff5e62; margin: 0 2px;
+            font-family: 'Arial Rounded MT Bold', 'Helvetica Rounded', sans-serif;
+        }
+        .total-days-badge {
+            display: inline-block; margin-top: 15px; padding: 6px 18px;
+            background-color: #ffe6ea; color: #ff5e62;
+            border-radius: 20px; font-size: 0.95rem; font-weight: bold;
+            border: 1px solid #ffccd5;
+        }
+        .tips { font-size: 0.7rem; color: #bbb; margin-top: 10px; }
+        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        input[type=number] { -moz-appearance: textfield; }
+        
+        /* 按钮与弹窗样式 */
+        .info-btn {
+            background: none; border: none; color: #ff9a9e;
+            font-size: 0.8rem; margin-top: 15px; text-decoration: underline;
+            cursor: pointer; padding: 5px;
+        }
+        .modal {
+            display: none; position: fixed; z-index: 999; left: 0; top: 0;
+            width: 100%; height: 100%; background-color: rgba(0,0,0,0.5);
+            backdrop-filter: blur(3px); animation: fadeIn 0.3s;
+        }
+        .modal-content {
+            background-color: #fff; margin: 5% auto; padding: 25px;
+            border: 1px solid #ffe6ea; width: 85%; max-width: 500px;
+            border-radius: 20px; box-shadow: 0 15px 50px rgba(0,0,0,0.2);
+            text-align: left; position: relative; max-height: 80vh; overflow-y: auto;
+        }
+        .close-btn {
+            color: #aaa; float: right; font-size: 28px; font-weight: bold;
+            cursor: pointer; margin-top: -10px; margin-right: -10px;
+        }
+        .modal-content h2 { 
+            color: #ff5e62; font-size: 1.1rem; margin-top: 0; text-align: center;
+            border-bottom: 2px solid #fff0f5; padding-bottom: 10px;
+        }
+        .modal-content h3 { 
+            color: #444; font-size: 0.95rem; margin-top: 20px; margin-bottom: 8px;
+            border-left: 4px solid #ff9a9e; padding-left: 8px;
+        }
+        .modal-content p, .modal-content li { 
+            color: #666; font-size: 0.85rem; line-height: 1.6; text-align: justify;
+        }
+        .modal-content ul, .modal-content ol { padding-left: 20px; margin: 5px 0; }
+        .security-box { 
+            background: #fff0f5; padding: 12px; border-radius: 8px;
+            border: 1px solid #ffccd5; margin-bottom: 15px;
+        }
+        .security-title { font-weight: bold; color: #d64545; font-size: 0.9rem; margin-bottom: 5px; }
+        .security-text { color: #d64545; font-size: 0.85rem; line-height: 1.5; }
+        @keyframes fadeIn { from {opacity: 0;} to {opacity: 1;} }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <input type="file" id="fileInput" accept="image/*">
+    <div class="photo-wrapper" onclick="document.getElementById('fileInput').click()">
+        <img id="babyPhoto" style="display:none;" alt="宝宝照片">
+        <div id="photoPlaceholder" class="photo-placeholder">点击上传<br>宝宝照片</div>
+    </div>
+    <input type="text" id="babyName" class="name-input" placeholder="输入宝宝姓名">
+    <div class="input-group">
+        <label>出生日期与时间</label>
+        <input type="date" id="dateIn">
+        <div class="time-row">
+            <div class="time-box">
+                <input type="number" id="hourIn" placeholder="12" min="0" max="23">
+                <span style="font-size:0.8rem; color:#aaa;">时</span>
+            </div>
+            <div class="colon">:</div>
+            <div class="time-box">
+                <input type="number" id="minIn" placeholder="00" min="0" max="59">
+                <span style="font-size:0.8rem; color:#aaa;">分</span>
+            </div>
+        </div>
+    </div>
+    <div id="result"><div style="color:#ccc; padding-top:10px;">请输入出生信息...</div></div>
+    <div class="tips">* 信息和照片仅保存在您的手机本地</div>
+    <button id="infoBtn" class="info-btn">📖 使用说明与安全声明</button>
+</div>
+
+<div id="infoModal" class="modal">
+    <div class="modal-content">
+        <span class="close-btn">&times;</span>
+        <h2>👶 宝宝成长记录与时光计算器<br><span style="font-size:0.8em; font-weight:normal; color:#888">(纯净隐私版)</span></h2>
+        
+        <div class="security-box">
+            <div class="security-title">🛡️ 项目安全核心声明</div>
+            <div class="security-text">
+                本工具采用 100% 纯前端架构设计，承诺“数据零上传”。<br>
+                所有照片、姓名、出生日期等敏感信息仅保存在用户<strong>当前的手机/电脑浏览器缓存</strong>中，绝不会经过任何服务器，也不会被开发者或第三方获取。您的数据，只属于您自己。
+            </div>
+        </div>
+
+        <h3>📖 项目简介</h3>
+        <p>这是一个专为新手父母设计的轻量级网页应用。它摒弃了传统 App 需要注册登录、上传数据的繁琐流程，提供了一个即开即用、精确到分钟的宝宝年龄计算器。界面采用温馨的樱花粉色调，不仅能实时显示宝宝的精确年龄（岁/月/天/时/分），还能自动计算“已出生总天数”（如百天纪念）。</p>
+
+        <h3>✨ 核心功能</h3>
+        <ul>
+            <li><strong>📸 本地化照片记忆</strong>：支持用户上传宝宝照片，系统自动裁剪为圆形头像。<br><span style="color:#999;font-size:0.8em">技术亮点：使用 HTML5 Canvas 技术在本地压缩图片，并转码为 Base64 字符串存入浏览器 localStorage。图片从未离开过您的设备。</span></li>
+            <li><strong>⏱️ 精准时光计算</strong>：自动处理闰年、大小月逻辑。实时计算并显示：X岁 X个月 X天 X小时 X分。</li>
+            <li><strong>🎨 极致体验设计</strong>：樱花粉主题，温馨治愈。内置强制浅色模式策略，防止浏览器强制修改背景色。</li>
+            <li><strong>💾 智能数据持久化</strong>：自动保存输入的名字、日期和照片。即使关闭网页或重启手机，下次打开时数据依然存在（依赖浏览器缓存）。</li>
+        </ul>
+
+        <h3>🔒 数据安全与隐私详解</h3>
+        <p>很多家长担心宝宝的照片上传到网络会被泄露，<strong>本项目从技术底层彻底解决了这个问题：</strong></p>
+        <ul>
+            <li><strong>🚫 无后端服务器</strong>：本项目没有后台数据库，没有服务器接收数据。它就像您手机里的“计算器”App 一样，是一个纯粹的工具。</li>
+            <li><strong>🔒 沙盒存储机制</strong>：数据存储使用浏览器的 Local Storage 技术。这意味着：
+                <ul>
+                    <li><strong>数据隔离</strong>：只有您当前使用的这台手机能看到这些信息。</li>
+                    <li><strong>无法共享</strong>：即使您把生成的网址发给亲友，他们打开也是空白的（因为数据在您的手机里，不在网址里）。</li>
+                    <li><strong>绝对私密</strong>：除非有人物理接触并解锁您的手机，否则没人能看到这些数据。</li>
+                </ul>
+            </li>
+        </ul>
+
+        <h3>🛠️ 技术栈</h3>
+        <p>核心语言：HTML5, CSS3, JavaScript (ES6+)<br>
+        存储技术：Web Storage API (localStorage)<br>
+        图像处理：Canvas API (用于前端图片压缩与转码)<br>
+        部署方式：静态页面部署 (Static Hosting)</p>
+
+        <h3>📱 如何使用</h3>
+        <ol>
+            <li><strong>打开链接</strong>：在浏览器中访问项目网址。</li>
+            <li><strong>上传照片</strong>：点击顶部的圆形区域，选择一张宝宝的可爱照片（照片仅本地显示）。</li>
+            <li><strong>输入信息</strong>：填写宝宝的小名、出生日期和具体时间。</li>
+            <li><strong>查看结果</strong>：页面会自动生成宝宝的精确年龄和累计天数。</li>
+            <li><strong>自动保存</strong>：无需点击保存按钮，输入即保存。</li>
+        </ol>
+
+        <h3>⚠️ 注意事项</h3>
+        <p>由于数据保存在浏览器的本地缓存中，请注意以下情况可能会导致数据丢失（需重新输入）：</p>
+        <ul>
+            <li>手动清理了浏览器的缓存/历史记录。</li>
+            <li>使用了“无痕浏览/隐私模式”打开网页。</li>
+            <li>卸载并重新安装了浏览器 App。</li>
+        </ul>
+    </div>
+</div>
+
+<script>
+    const els = {
+        name: document.getElementById('babyName'),
+        date: document.getElementById('dateIn'),
+        hour: document.getElementById('hourIn'),
+        min: document.getElementById('minIn'),
+        result: document.getElementById('result'),
+        photo: document.getElementById('babyPhoto'),
+        placeholder: document.getElementById('photoPlaceholder'),
+        fileIn: document.getElementById('fileInput')
+    };
+
+    // 弹窗逻辑
+    const modal = document.getElementById("infoModal");
+    const btn = document.getElementById("infoBtn");
+    const span = document.getElementsByClassName("close-btn")[0];
+    btn.onclick = function() { modal.style.display = "block"; }
+    span.onclick = function() { modal.style.display = "none"; }
+    window.onclick = function(event) { if (event.target == modal) modal.style.display = "none"; }
+
+    window.onload = function() {
+        loadData(); setInterval(calculateAge, 30000); 
+    };
+    [els.name, els.date, els.hour, els.min].forEach(el => {
+        el.addEventListener('input', () => { saveData(); calculateAge(); });
+    });
+    els.fileIn.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(event) {
+            const img = new Image();
+            img.src = event.target.result;
+            img.onload = function() {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                const MAX_SIZE = 300; 
+                let width = img.width; let height = img.height;
+                if (width > height) { if (width > MAX_SIZE) { height *= MAX_SIZE / width; width = MAX_SIZE; } } 
+                else { if (height > MAX_SIZE) { width *= MAX_SIZE / height; height = MAX_SIZE; } }
+                canvas.width = width; canvas.height = height;
+                ctx.drawImage(img, 0, 0, width, height);
+                const dataURL = canvas.toDataURL('image/jpeg', 0.7);
+                localStorage.setItem('baby_photo_data', dataURL); displayPhoto(dataURL);
+            }
+        };
+        reader.readAsDataURL(file);
+    });
+
+    function displayPhoto(src) {
+        if(src) { els.photo.src = src; els.photo.style.display = 'block'; els.placeholder.style.display = 'none'; }
+    }
+    function saveData() {
+        const data = { name: els.name.value, date: els.date.value, hour: els.hour.value, min: els.min.value };
+        localStorage.setItem('baby_info_data', JSON.stringify(data));
+    }
+    function loadData() {
+        const saved = localStorage.getItem('baby_info_data');
+        if (saved) {
+            const data = JSON.parse(saved);
+            els.name.value = data.name || ''; els.date.value = data.date || '';
+            els.hour.value = data.hour || ''; els.min.value = data.min || '';
+            calculateAge(); 
+        }
+        const photoData = localStorage.getItem('baby_photo_data');
+        if (photoData) displayPhoto(photoData);
+    }
+    function calculateAge() {
+        const dVal = els.date.value;
+        if (!dVal) return;
+        const hVal = parseInt(els.hour.value) || 0; const mVal = parseInt(els.min.value) || 0;
+        const birthDate = new Date(`${dVal}T00:00:00`);
+        birthDate.setHours(hVal); birthDate.setMinutes(mVal);
+        const now = new Date();
+        if (birthDate > now) { els.result.innerHTML = '<span style="color:#ff6b6b">时间设置在未来了哦~</span>'; return; }
+
+        let years = now.getFullYear() - birthDate.getFullYear();
+        let months = now.getMonth() - birthDate.getMonth();
+        let days = now.getDate() - birthDate.getDate();
+        let hours = now.getHours() - birthDate.getHours();
+        let minutes = now.getMinutes() - birthDate.getMinutes();
+
+        if (minutes < 0) { minutes += 60; hours--; }
+        if (hours < 0) { hours += 24; days--; }
+        if (days < 0) {
+            const prevMonth = new Date(now.getFullYear(), now.getMonth(), 0);
+            days += prevMonth.getDate(); months--;
+        }
+        if (months < 0) { months += 12; years--; }
+
+        const diffTime = now.getTime() - birthDate.getTime();
+        const totalDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+        const name = els.name.value ? els.name.value : '宝宝';
+
+        els.result.innerHTML = `
+            <div class="age-main">${name}已经</div>
+            <div style="margin-bottom:10px;">
+                <span class="number-highlight">${years}</span>岁
+                <span class="number-highlight">${months}</span>个月
+                <span class="number-highlight">${days}</span>天
+            </div>
+            <div class="age-sub">
+                <span class="number-highlight" style="font-size:1.2rem">${pad(hours)}</span>小时
+                <span class="number-highlight" style="font-size:1.2rem">${pad(minutes)}</span>分
+            </div>
+            <div class="total-days-badge">已出生 ${totalDays} 天</div>
+        `;
+    }
+    function pad(n) { return n < 10 ? '0' + n : n; }
+</script>
+</body>
+</html>
