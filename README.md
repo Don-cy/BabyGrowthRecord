@@ -65,25 +65,6 @@ Using "Incognito/Private Mode" to open the webpage.
 
 Uninstalling and reinstalling the browser app.
 
-📜 Version History
-Latest Version V5.2
-Optimized version history UI, added collapsible view functionality.
-
-Updated copy and titles.
-
-Previous Versions (V1.0-V5.1)
-Version	Description
-V5.1	Optimized sync guidance copy.
-V5.0	Added full data backup/restore, secondary event editing, intelligent compression algorithm.
-V4.9	Mobile UI adaptation optimization, copy corrections.
-V4.8	Anniversary logic重构 (star-pinning, display as needed).
-V4.1	Added anniversary calculation, import data deduplication and merging.
-V3.0	Added Excel export, one-click reset.
-V2.8	Storage structure optimization, carousel limit increased to 5 images.
-V2.5	Interface layout optimization, major events support date-only recording.
-V2.2	Added major growth events recording.
-V1.5	Added carousel album feature.
-V1.0	Basic age calculation, photo avatar, data local storage.
 🛠️ Technology Stack
 Core Languages: HTML5, CSS3, JS (ES6+)
 
@@ -158,25 +139,6 @@ Developer: Don-cy
 
 卸载并重新安装了浏览器 App。
 
-📜 版本说明
-最新版本 V5.2
-优化版本历史记录UI，增加折叠查看功能
-
-文案与标题更新
-
-历史版本 (V1.0-V5.1)
-版本	描述
-V5.1	优化同步引导文案
-V5.0	新增全数据备份/恢复，事件二次编辑，智能压缩算法
-V4.9	移动端UI适配优化，文案修正
-V4.8	纪念日逻辑重构（星标置顶、按需显示）
-V4.1	新增纪念日计算，导入数据去重合并
-V3.0	新增Excel导出，一键重置
-V2.8	存储结构优化，轮播上限增至5张
-V2.5	界面布局优化，大事件支持纯日期记录
-V2.2	新增成长大事件记录
-V1.5	新增轮播相册功能
-V1.0	基础年龄计算，照片头像，数据本地存储
 🛠️ 技术栈
 核心语言： HTML5, CSS3, JS (ES6+)
 
